@@ -1,0 +1,8 @@
+{
+  "domain": "ciaowarm",
+  "name": "Ciaowarm",
+  "documentation": "https://developers.home-assistant.io/docs/dev_101_services",
+  "config_flow": true,
+  "iot_class": "local_push",
+  "version": "0.1.0"
+}
