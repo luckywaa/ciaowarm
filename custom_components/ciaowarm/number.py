@@ -123,9 +123,6 @@ class XiaowoNumber(XiaowoEntity, NumberEntity):
         if self.option_key == 33:
             if self._device.auto_ctrl:
                 LOGGER.error("自动控制采暖水目标温度为允许状态，无法设置采暖水目标温度！")
-                errors = {}
-                errors["base"] = "自动控制采暖水目标温度为允许状态，无法设置采暖水目标温度！"
-                # return self.async_show_form(step_id="init", data_schema=vol.Schema({"user_title": str}), errors=errors)
                 return
         if self.option_key == 162:
             if self._device.ext_auto_ctrl:

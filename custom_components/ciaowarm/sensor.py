@@ -46,7 +46,6 @@ OPTIONS = {
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
-    LOGGER.error("setup sensor entry start")
     hass_data: HomeAssistantXiaowoData = hass.data[DOMAIN][entry.entry_id]
     device_list = hass_data.device_list
     entities: list[XiaowoSensor] = []
@@ -78,7 +77,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             entities.append(XiaowoSensor(device, 'ext_error_code', device.error_code, device_id))
 
     async_add_entities(entities)
-    LOGGER.error("setup sensor entry end")
 
 
 class XiaowoSensor(XiaowoEntity, SensorEntity):

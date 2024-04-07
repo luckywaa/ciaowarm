@@ -14,7 +14,6 @@ class XiaowoEntity(Entity):
     """Xiaowo base device."""
 
     def __init__(self, device_id) -> None:
-        """Init TuyaHaEntity."""
         self._attr_unique_id = f"xiaowo.{device_id}"
         self._device_id = device_id
 

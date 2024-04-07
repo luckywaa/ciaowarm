@@ -2,7 +2,7 @@ import logging
 
 DOMAIN = "ciaowarm"
 LOGGER = logging.getLogger(__package__)
-REQUEST_URL_PREFIX = "https://test.iwarm.com:444"
+REQUEST_URL_PREFIX = "https://api.iwarm.com"
 CONF_PHONE = "phone"
 CONF_KEY = "key"
 

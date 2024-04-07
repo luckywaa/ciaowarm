@@ -175,7 +175,6 @@ class XiaowoSelectSensor(XiaowoEntity, SelectEntity):
             self._attr_current_option = self._attr_options[self._device.work_mode]
 
     async def async_select_option(self, option: str) -> None:
-        LOGGER.error("option: %s", option)
         if self._type == 'switch_ctrl':
             if option == '开机':
                 value = True

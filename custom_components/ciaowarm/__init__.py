@@ -28,8 +28,6 @@ WEATHER_TIME_BETWEEN_UPDATES = timedelta(seconds=20)
 
 
 async def async_setup_entry(hass, entry):
-    """Set up the Xiaomi Miio components from a config entry."""
-    LOGGER.error("init entry start")
     hass.data.setdefault(DOMAIN, {})
     phone = entry.data[CONF_PHONE]
     access_token = entry.data[CONF_KEY]
@@ -98,7 +96,6 @@ async def async_setup_entry(hass, entry):
         LOGGER.error("Error while accessing: %s", _device_info_url)
         return False
 
-    LOGGER.error("init entry end")
     return True
 
 
