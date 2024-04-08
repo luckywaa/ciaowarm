@@ -59,10 +59,10 @@ class XiaowoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        CONF_PHONE, default=user_input.get(CONF_PHONE, "13265687250")
+                        CONF_PHONE, default=user_input.get(CONF_PHONE, ""), description="请输入手机号码"
                     ): str,
                     vol.Required(
-                        CONF_KEY, default=user_input.get(CONF_KEY, "2ef53325c060e16ce3ed3a1167a3fb81")
+                        CONF_KEY, default=user_input.get(CONF_KEY, ""), description="请输入授权码"
                     ): str
                 }
             ),
