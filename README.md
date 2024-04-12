@@ -81,6 +81,7 @@
    - Starlink Gateway
    - Halowarm Gateway
    - Ciaowarm Wall-mounted Boiler
+   - Ciaowarm room thermostat
    - Third-party Wall-mounted Boilers compatible with Starlink Gateway
 
 2. Integration Steps:
