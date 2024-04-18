@@ -87,7 +87,7 @@
 2. Integration Steps:
 
    - Download and install the Ciaowarm App from the App store (available for both Android and iOS). Log in and bind devices using your phone number.
-   - Click on this link ([Get Authorization Code](https://www.baidu.com)) and obtain the authorization code by entering your phone number (Note: The phone number entered must match the one used for login in step 1). Save the obtained authorization code.
+   - Click on this link ([Get Authorization Code](https://cloud.ciaowarm.com/halogin.html) and obtain the authorization code by entering your phone number (Note: The phone number entered must match the one used for login in step 1). Save the obtained authorization code.
    - Copy the "ciaowarm" folder to the "custom_components" folder in Home Assistant, and restart Home Assistant.
    - Click on the "Configuration" tab on the left sidebar of Home Assistant, then click on "Devices & Services", and finally click on "Add Integration" in the bottom right corner. Select the "Ciaowarm" brand, enter the phone number used in steps 1 and 2 in the input box above, enter the authorization code obtained in step 2 in the input box below, click "Submit", and you will have completed the integration.
 
