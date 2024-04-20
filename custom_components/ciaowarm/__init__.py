@@ -56,7 +56,7 @@ async def async_setup_entry(hass, entry):
                                 device_registry.async_get_or_create(
                                     config_entry_id=entry.entry_id,
                                     identifiers={(DOMAIN, thermostat_id)},
-                                    manufacturer="Xiaowo",
+                                    manufacturer="IWARM TECH CO., LTD.",
                                     name=thermostat["thermostat_name"],
                                     model=f"thermostat",
                                 )
@@ -68,7 +68,7 @@ async def async_setup_entry(hass, entry):
                                 device_registry.async_get_or_create(
                                     config_entry_id=entry.entry_id,
                                     identifiers={(DOMAIN, boiler_id)},
-                                    manufacturer="Xiaowo",
+                                    manufacturer="IWARM TECH CO., LTD.",
                                     name="小沃壁挂炉",
                                     model=f"boiler",
                                 )
@@ -79,7 +79,7 @@ async def async_setup_entry(hass, entry):
                             device_registry.async_get_or_create(
                                 config_entry_id=entry.entry_id,
                                 identifiers={(DOMAIN, ext_boiler_id)},
-                                manufacturer="undefined",
+                                manufacturer="IWARM TECH CO., LTD.",
                                 name="第三方壁挂炉",
                                 model=f"extBoiler",
                             )

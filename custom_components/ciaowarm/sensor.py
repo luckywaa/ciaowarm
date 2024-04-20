@@ -158,9 +158,9 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
             self._attr_state = self._device.dhw_water_temp
         elif self._type == "flame_status":
             if self._device.flame_status:
-                self._attr_state = "有火"
-            else:
                 self._attr_state = "无火"
+            else:
+                self._attr_state = "有火"
         elif self._type == "fault_code":
             self._attr_state = self._device.fault_code
         elif self._type == "ext_boiler_gateway_id":
@@ -175,6 +175,9 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
         elif self._type == "ext_dhw_water_temp":
             self._attr_state = self._device.dhw_water_temp
         elif self._type == "ext_flame":
-            self._attr_state = self._device.flame
+            if self._device.flame == 1:
+                self._attr_state = "有火"
+            else:
+                self._attr_state = "无火"
         elif self._type == "ext_error_code":
             self._attr_state = self._device.error_code
