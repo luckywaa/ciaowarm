@@ -4,5 +4,5 @@
   "documentation": "https://gitee.com/iwarmtech_company/ha.git",
   "config_flow": true,
   "iot_class": "local_push",
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
