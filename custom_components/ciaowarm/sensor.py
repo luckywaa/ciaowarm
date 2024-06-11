@@ -151,7 +151,7 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
             else:
                 self._attr_state = "离线"
         elif self._type == "water_pressure_value":
-            self._attr_state = self._device.water_pressure_value
+            self._attr_state = self._device.water_pressure_value / 10
         elif self._type == "heating_water_temp":
             self._attr_state = self._device.heating_water_temp
         elif self._type == "dhw_water_temp":
