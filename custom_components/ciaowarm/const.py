@@ -61,6 +61,8 @@ class XiaowoBoiler(XiaowoDevice):
         self.water_pressure_value = boiler['water_pressure_value']
         self.heating_water_temp = boiler['heating_water_temp']
         self.dhw_water_temp = boiler['dhw_water_temp']
+        self.heating_return_water_temp = boiler['heating_return_water_temp']
+        self.dhw_return_water_temp = boiler['dhw_return_water_temp']
         self.flame_status = boiler['flame_status']
         self.fault_code = boiler['fault_code']
 
@@ -76,6 +78,8 @@ class XiaowoBoiler(XiaowoDevice):
         self.water_pressure_value = boiler['water_pressure_value']
         self.heating_water_temp = boiler['heating_water_temp']
         self.dhw_water_temp = boiler['dhw_water_temp']
+        self.heating_return_water_temp = boiler['heating_return_water_temp']
+        self.dhw_return_water_temp = boiler['dhw_return_water_temp']
         self.flame_status = boiler['flame_status']
         self.fault_code = boiler['fault_code']
 

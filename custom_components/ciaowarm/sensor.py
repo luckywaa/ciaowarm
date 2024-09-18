@@ -32,6 +32,8 @@ OPTIONS = {
     "water_pressure_value": ["Boiler_water_pressure_value", "水压值", "mdi:speedometer", ' '],
     "heating_water_temp": ["Boiler_heating_water_temp", "采暖水出水温度", "mdi:sun-thermometer-outline", TEMP_CELSIUS],
     "dhw_water_temp": ["Boiler_dhw_water_temp", "卫浴水出水温度", "mdi:water-thermometer-outline", TEMP_CELSIUS],
+    "heating_return_water_temp": ["Boiler_heating_return_water_temp", "采暖水回水温度", "mdi:sun-thermometer-outline", TEMP_CELSIUS],
+    "dhw_return_water_temp": ["Boiler_dhw_return_water_temp", "卫浴水回水温度", "mdi:water-thermometer-outline", TEMP_CELSIUS],
     "flame_status": ["Boiler_flame_status", "火焰状态", "mdi:fire", ' '],
     "fault_code": ["Boiler_fault_code", "故障码", "mdi:alert-outline", ' '],
 
@@ -65,6 +67,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             entities.append(XiaowoSensor(device, 'water_pressure_value', device.water_pressure_value, device_id))
             entities.append(XiaowoSensor(device, 'heating_water_temp', device.heating_water_temp, device_id))
             entities.append(XiaowoSensor(device, 'dhw_water_temp', device.dhw_water_temp, device_id))
+            entities.append(XiaowoSensor(device, 'heating_return_water_temp', device.heating_return_water_temp, device_id))
+            entities.append(XiaowoSensor(device, 'dhw_return_water_temp', device.dhw_return_water_temp, device_id))
             entities.append(XiaowoSensor(device, 'flame_status', device.flame_status, device_id))
             entities.append(XiaowoSensor(device, 'fault_code', device.fault_code, device_id))
         if isinstance(device, XiaowoExtBoiler):
@@ -156,6 +160,10 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
             self._attr_state = self._device.heating_water_temp
         elif self._type == "dhw_water_temp":
             self._attr_state = self._device.dhw_water_temp
+        elif self._type == "heating_return_water_temp":
+            self._attr_state = self._device.heating_return_water_temp
+        elif self._type == "dhw_return_water_temp":
+            self._attr_state = self._device.dhw_return_water_temp
         elif self._type == "flame_status":
             if self._device.flame_status:
                 self._attr_state = "无火"
