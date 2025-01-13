@@ -15,14 +15,10 @@ from .const import (
     XiaowoThermostat, XiaowoBoiler, XiaowoExtBoiler
 )
 
-from homeassistant.const import (
-    TEMP_CELSIUS,
-)
-
 OPTIONS = {
     "thermostat_gateway_id": ["Thermostat_gateway_id", "网关ID", "mdi:identifier", ' '],
     "thermostat_id": ["Thermostat_thermostat_id", "温控器ID", "mdi:identifier", ' '],
-    "room_temp": ["Thermostat_room_temp", "室内温度", "mdi:home-thermometer-outline", TEMP_CELSIUS],
+    "room_temp": ["Thermostat_room_temp", "室内温度", "mdi:home-thermometer-outline", '°C'],
     "thermostat_online": ["Thermostat_online", "温控器在线状态", "mdi:signal-variant", ' '],
     "thermostat_name": ["Thermostat_thermostat_name", "温控器名称", "mdi:subtitles-outline", ' '],
 
@@ -30,18 +26,18 @@ OPTIONS = {
     "boiler_id": ["Boiler_boiler_id", "壁挂炉ID", "mdi:identifier", ' '],
     "boiler_online": ["Boiler_boiler_online", "壁挂炉在线状态", "mdi:signal-variant", ' '],
     "water_pressure_value": ["Boiler_water_pressure_value", "水压值", "mdi:speedometer", ' '],
-    "heating_water_temp": ["Boiler_heating_water_temp", "采暖水出水温度", "mdi:sun-thermometer-outline", TEMP_CELSIUS],
-    "dhw_water_temp": ["Boiler_dhw_water_temp", "卫浴水出水温度", "mdi:water-thermometer-outline", TEMP_CELSIUS],
-    "heating_return_water_temp": ["Boiler_heating_return_water_temp", "采暖水回水温度", "mdi:sun-thermometer-outline", TEMP_CELSIUS],
-    "dhw_return_water_temp": ["Boiler_dhw_return_water_temp", "卫浴水回水温度", "mdi:water-thermometer-outline", TEMP_CELSIUS],
+    "heating_water_temp": ["Boiler_heating_water_temp", "采暖水出水温度", "mdi:sun-thermometer-outline", '°C'],
+    "dhw_water_temp": ["Boiler_dhw_water_temp", "卫浴水出水温度", "mdi:water-thermometer-outline", '°C'],
+    "heating_return_water_temp": ["Boiler_heating_return_water_temp", "采暖水回水温度", "mdi:sun-thermometer-outline", '°C'],
+    "dhw_return_water_temp": ["Boiler_dhw_return_water_temp", "卫浴水回水温度", "mdi:water-thermometer-outline", '°C'],
     "flame_status": ["Boiler_flame_status", "火焰状态", "mdi:fire", ' '],
     "fault_code": ["Boiler_fault_code", "故障码", "mdi:alert-outline", ' '],
 
     "ext_boiler_gateway_id": ["Ext_boiler_gateway_id", "网关ID", "mdi:identifier", ' '],
     "ext_boiler_online": ["Ext_boiler_online", "网关在线状态", "mdi:signal-variant", ' '],
-    "ext_ch_water_temp": ["Ext_boiler_ch_water_temp", "采暖水实际温度", "mdi:sun-thermometer-outline", TEMP_CELSIUS],
+    "ext_ch_water_temp": ["Ext_boiler_ch_water_temp", "采暖水实际温度", "mdi:sun-thermometer-outline", '°C'],
     "ext_dhw_water_temp": ["Ext_boiler_dhw_water_temp", "卫浴水实际温度", "mdi:water-thermometer-outline",
-                           TEMP_CELSIUS],
+                           '°C'],
     "ext_flame": ["Ext_boiler_flame", "火焰状态", "mdi:fire", ' '],
     "ext_error_code": ["Ext_boiler_error_code", "故障码", "mdi:alert-outline", ' '],
 }

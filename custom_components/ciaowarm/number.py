@@ -5,10 +5,6 @@ from homeassistant.components.number import NumberEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 
-from homeassistant.const import (
-    TEMP_CELSIUS,
-)
-
 from . import HomeAssistantXiaowoData
 from .base import XiaowoEntity
 from .const import (
@@ -18,20 +14,20 @@ from .const import (
 )
 
 OPTIONS = {
-    "trg_temp_leave": ["Thermostat_trg_temp_leave", "离家模式目标温度", "mdi:temperature-celsius", TEMP_CELSIUS, 5, 35,
+    "trg_temp_leave": ["Thermostat_trg_temp_leave", "离家模式目标温度", "mdi:temperature-celsius", '°C', 5, 35,
                        14],
-    "trg_temp_home": ["Thermostat_trg_temp_home", "居家模式目标温度", "mdi:temperature-celsius", TEMP_CELSIUS, 5, 35,
+    "trg_temp_home": ["Thermostat_trg_temp_home", "居家模式目标温度", "mdi:temperature-celsius", '°C', 5, 35,
                       15],
-    "trg_temp_sleep": ["Thermostat_trg_temp_sleep", "睡眠模式目标温度", "mdi:temperature-celsius", TEMP_CELSIUS, 5, 35,
+    "trg_temp_sleep": ["Thermostat_trg_temp_sleep", "睡眠模式目标温度", "mdi:temperature-celsius", '°C', 5, 35,
                        16],
 
-    "heating_trg_temp": ["Boiler_heating_trg_temp", "采暖水目标温度", "mdi:sun-thermometer-outline", TEMP_CELSIUS, 30,
+    "heating_trg_temp": ["Boiler_heating_trg_temp", "采暖水目标温度", "mdi:sun-thermometer-outline", '°C', 30,
                          80, 33],
-    "dhw_trg_temp": ["Boiler_dhw_trg_temp", "卫浴水目标温度", "mdi:water-thermometer-outline", TEMP_CELSIUS, 30, 60, 7],
+    "dhw_trg_temp": ["Boiler_dhw_trg_temp", "卫浴水目标温度", "mdi:water-thermometer-outline", '°C', 30, 60, 7],
 
-    "ch_setpoint": ["Ext_boiler_ch_setpoint", "采暖水目标温度", "mdi:sun-thermometer-outline", TEMP_CELSIUS, 30, 80,
+    "ch_setpoint": ["Ext_boiler_ch_setpoint", "采暖水目标温度", "mdi:sun-thermometer-outline", '°C', 30, 80,
                     162],
-    "dhw_setpoint": ["Ext_boiler_dhw_setpoint", "卫浴水目标温度", "mdi:water-thermometer-outline", TEMP_CELSIUS, 30, 60,
+    "dhw_setpoint": ["Ext_boiler_dhw_setpoint", "卫浴水目标温度", "mdi:water-thermometer-outline", '°C', 30, 60,
                      163],
 }
 
