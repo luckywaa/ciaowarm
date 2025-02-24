@@ -19,6 +19,7 @@ OPTIONS = {
     "thermostat_gateway_id": ["Thermostat_gateway_id", "网关ID", "mdi:identifier", ' '],
     "thermostat_id": ["Thermostat_thermostat_id", "温控器ID", "mdi:identifier", ' '],
     "room_temp": ["Thermostat_room_temp", "室内温度", "mdi:home-thermometer-outline", '°C'],
+    "room_temp_correct": ["Thermostat_room_temp_correct", "修正后室内温度", "mdi:home-thermometer-outline", '°C'],
     "thermostat_online": ["Thermostat_online", "温控器在线状态", "mdi:signal-variant", ' '],
     "thermostat_name": ["Thermostat_thermostat_name", "温控器名称", "mdi:subtitles-outline", ' '],
 
@@ -53,6 +54,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             entities.append(XiaowoSensor(device, 'thermostat_gateway_id', device.gateway_id, device_id))
             entities.append(XiaowoSensor(device, 'thermostat_id', device.thermostat_id, device_id))
             entities.append(XiaowoSensor(device, 'room_temp', device.room_temp, device_id))
+            entities.append(XiaowoSensor(device, 'room_temp_correct', device.room_temp_correct, device_id))
             entities.append(XiaowoSensor(device, 'thermostat_online', device.thermostat_online, device_id))
             entities.append(XiaowoSensor(device, 'thermostat_name', device.thermostat_name, device_id))
         if isinstance(device, XiaowoBoiler):
@@ -95,6 +97,22 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
         self._attributes = {"states": "null"}
         self._attr_unique_id = f"{super().unique_id}{OPTIONS[option][0]}"
         self._option_value = option_value
+        if self._type == "thermostat_online":
+            self._attr_device_class = "enum"
+            self._attr_options: list[str] = ['在线', '离线']
+        elif self._type == "boiler_online":
+            self._attr_device_class = "enum"
+            self._attr_options: list[str] = ['在线', '离线']
+        elif self._type == "flame_status":
+            self._attr_device_class = "enum"
+            self._attr_options: list[str] = ['无火', '有火']
+        elif self._type == "ext_boiler_online":
+            self._attr_device_class = "enum"
+            self._attr_options: list[str] = ['在线', '离线']
+        elif self._type == "ext_flame":
+            self._attr_device_class = "enum"
+            self._attr_options: list[str] = ['有火', '无火']
+
 
     @property
     def name(self):
@@ -130,58 +148,82 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
     async def async_update(self):
         if self._type == 'thermostat_gateway_id':
             self._attr_state = self._device.gateway_id
+            self._attributes["states"] = self._device.gateway_id
         elif self._type == "thermostat_id":
             self._attr_state = self._device.thermostat_id
+            self._attributes["states"] = self._device.thermostat_id
         elif self._type == "room_temp":
             self._attr_state = self._device.room_temp / 10
+            self._attributes["states"] = self._device.room_temp / 10
+        elif self._type == "room_temp_correct":
+            self._attr_state = self._device.room_temp_correct / 10
+            self._attributes["states"] = self._device.room_temp_correct / 10
         elif self._type == "thermostat_online":
             if self._device.thermostat_online:
                 self._attr_state = "在线"
             else:
                 self._attr_state = "离线"
+            self._attributes["states"] = self._device.thermostat_online
         elif self._type == "thermostat_name":
             self._attr_state = self._device.thermostat_name
+            self._attributes["states"] = self._device.thermostat_name
         elif self._type == "boiler_gateway_id":
             self._attr_state = self._device.gateway_id
+            self._attributes["states"] = self._device.gateway_id
         elif self._type == "boiler_id":
             self._attr_state = self._device.boiler_id
+            self._attributes["states"] = self._device.boiler_id
         elif self._type == "boiler_online":
             if self._device.boiler_online:
                 self._attr_state = "在线"
             else:
                 self._attr_state = "离线"
+            self._attributes["states"] = self._device.boiler_online
         elif self._type == "water_pressure_value":
             self._attr_state = self._device.water_pressure_value / 10
+            self._attributes["states"] = self._device.water_pressure_value / 10
         elif self._type == "heating_water_temp":
             self._attr_state = self._device.heating_water_temp
+            self._attributes["states"] = self._device.heating_water_temp
         elif self._type == "dhw_water_temp":
             self._attr_state = self._device.dhw_water_temp
+            self._attributes["states"] = self._device.dhw_water_temp
         elif self._type == "heating_return_water_temp":
             self._attr_state = self._device.heating_return_water_temp
+            self._attributes["states"] = self._device.heating_return_water_temp
         elif self._type == "dhw_return_water_temp":
             self._attr_state = self._device.dhw_return_water_temp
+            self._attributes["states"] = self._device.dhw_return_water_temp
         elif self._type == "flame_status":
             if self._device.flame_status:
                 self._attr_state = "无火"
             else:
                 self._attr_state = "有火"
+            self._attributes["states"] = self._device.flame_status
         elif self._type == "fault_code":
             self._attr_state = self._device.fault_code
+            self._attributes["states"] = self._device.fault_code
         elif self._type == "ext_boiler_gateway_id":
             self._attr_state = self._device.gateway_id
+            self._attributes["states"] = self._device.gateway_id
         elif self._type == "ext_boiler_online":
             if self._device.ext_boiler_online:
                 self._attr_state = "在线"
             else:
                 self._attr_state = "离线"
+            self._attributes["states"] = self._device.ext_boiler_online
         elif self._type == "ext_ch_water_temp":
             self._attr_state = self._device.ch_water_temp
+            self._attributes["states"] = self._device.ch_water_temp
         elif self._type == "ext_dhw_water_temp":
             self._attr_state = self._device.dhw_water_temp
+            self._attributes["states"] = self._device.dhw_water_temp
         elif self._type == "ext_flame":
             if self._device.flame == 1:
                 self._attr_state = "有火"
             else:
                 self._attr_state = "无火"
+            self._attributes["states"] = self._device.flame
         elif self._type == "ext_error_code":
             self._attr_state = self._device.error_code
+            self._attributes["states"] = self._device.error_code

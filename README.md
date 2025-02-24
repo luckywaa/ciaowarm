@@ -18,7 +18,7 @@
     - 将ciaowarm文件夹复制到Home Assistant的custom_components文件夹下，并重启Home Assistant。
     - 点击Home Assistant左侧导航栏“配置”，点击"设备与服务"，点击右下角的“添加集成”，选择“Ciaowarm”品牌，在上面的输入框内输入步骤1和2所用的手机号，在下面的输入框内输入步骤2获取到的授权码，点击“提交”，即可完成接入。
 
-   
+
 3. 支持的参数：
 
     温控器：
@@ -30,15 +30,16 @@
    |  温控器在线状态  |   只读   |
    |    温控器名称    |   只读   |
    |     室内温度     |   只读   |
+   |  修正后室内温度  |   只读   |
    | 离家模式目标温度 |  可读写  |
    | 居家模式目标温度 |  可读写  |
    | 睡眠模式目标温度 |  可读写  |
    |       模式       |  可读写  |
-
    
-
+   
+   
     小沃壁挂炉：
-
+   
    |         参数名         |                      操作权限                      |
    | :--------------------: | :------------------------------------------------: |
    |         网关ID         |                        只读                        |
@@ -52,14 +53,16 @@
    |     卫浴水目标温度     |                       可读写                       |
    |     采暖水出水温度     |                        只读                        |
    |     卫浴水出水温度     |                        只读                        |
+   |     采暖水回水温度     |                        只读                        |
+   |     卫浴水回水温度     |                        只读                        |
    |         故障码         |                        只读                        |
    |        火焰状态        |                        只读                        |
    |         水压值         |                        只读                        |
-
    
-
+   
+   
     第三方壁挂炉：
-
+   
    |     参数名     |               读写               |
    | :------------: | :------------------------------: |
    |     网关ID     |               只读               |
@@ -104,13 +107,14 @@
    | Thermostat Online State       | Read-only            |
    | Thermostat Name               | Read-only            |
    | Indoor Temperature            | Read-only            |
+   | Correct Indoor Temperature    | Read-only            |
    | Away Mode Target Temperature  | Read-write           |
    | Home Mode Target Temperature  | Read-write           |
    | Sleep Mode Target Temperature | Read-write           |
    | Mode                          | Read-write           |
-
+   
    Ciaowarm Wall-mounted Boiler:
-
+   
    | Parameter Name                                        | Operation Permission                                         |
    | ----------------------------------------------------- | ------------------------------------------------------------ |
    | Gateway ID                                            | Read-only                                                    |
@@ -124,12 +128,14 @@
    | Bathroom Water Target Temperature                     | Read-write                                                   |
    | Heating Water Outlet Temperature                      | Read-only                                                    |
    | Bathroom Water Outlet Temperature                     | Read-only                                                    |
+   | Heating Water Return Temperature                      | Read-only                                                    |
+   | Bathroom Water Return Temperature                     | Read-only                                                    |
    | Fault Code                                            | Read-only                                                    |
    | Flame Status                                          | Read-only                                                    |
    | Water Pressure Value                                  | Read-only                                                    |
-
+   
    Third-party Wall-mounted Boiler:
-
+   
    | Parameter Name                    | Operation Permission                                         |
    | --------------------------------- | ------------------------------------------------------------ |
    | Gateway ID                        | Read-only                                                    |
@@ -142,4 +148,3 @@
    | Heating Water Actual Temperature  | Read-only                                                    |
    | Bathroom Water Actual Temperature | Read-only                                                    |
    | Fault Code                        | Read-only                                                    |
-   
