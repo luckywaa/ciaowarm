@@ -33,6 +33,7 @@ OPTIONS = {
     "dhw_return_water_temp": ["Boiler_dhw_return_water_temp", "卫浴水回水温度", "mdi:water-thermometer-outline", '°C'],
     "flame_status": ["Boiler_flame_status", "火焰状态", "mdi:fire", ' '],
     "fault_code": ["Boiler_fault_code", "故障码", "mdi:alert-outline", ' '],
+    "dhw_preheat_mode": ["Boiler_dhw_preheat_mode", "卫浴水工作模式", "mdi:alpha-m-box-outline", ' '],
 
     "ext_boiler_gateway_id": ["Ext_boiler_gateway_id", "网关ID", "mdi:identifier", ' '],
     "ext_boiler_online": ["Ext_boiler_online", "网关在线状态", "mdi:signal-variant", ' '],
@@ -69,6 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
             entities.append(XiaowoSensor(device, 'dhw_return_water_temp', device.dhw_return_water_temp, device_id))
             entities.append(XiaowoSensor(device, 'flame_status', device.flame_status, device_id))
             entities.append(XiaowoSensor(device, 'fault_code', device.fault_code, device_id))
+            entities.append(XiaowoSensor(device, 'dhw_preheat_mode', device.dhw_preheat_mode, device_id))
         if isinstance(device, XiaowoExtBoiler):
             device_id = "e" + str(device.gateway_id)
             entities.append(XiaowoSensor(device, 'ext_boiler_gateway_id', device.gateway_id, device_id))
@@ -203,6 +205,16 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
         elif self._type == "fault_code":
             self._attr_state = self._device.fault_code
             self._attributes["states"] = self._device.fault_code
+        elif self._type == "dhw_preheat_mode":
+            if self._device.dhw_preheat_mode == 1:
+                self._attr_state = "短时预热"
+            elif self._device.dhw_preheat_mode == 2:
+                self._attr_state = "定时预热"
+            elif self._device.dhw_preheat_mode == 3:
+                self._attr_state = "水控单次预热"
+            else:
+                self._attr_state = "未启用"
+            self._attributes["states"] = self._device.dhw_preheat_mode
         elif self._type == "ext_boiler_gateway_id":
             self._attr_state = self._device.gateway_id
             self._attributes["states"] = self._device.gateway_id

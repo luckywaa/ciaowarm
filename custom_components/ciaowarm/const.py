@@ -67,6 +67,7 @@ class XiaowoBoiler(XiaowoDevice):
         self.dhw_return_water_temp = boiler['dhw_return_water_temp']
         self.flame_status = boiler['flame_status']
         self.fault_code = boiler['fault_code']
+        self.dhw_preheat_mode = boiler['dhw_preheat_mode']
 
     def update(self, boiler):
         self.heating_trg_temp = boiler['heating_trg_temp']
@@ -84,6 +85,7 @@ class XiaowoBoiler(XiaowoDevice):
         self.dhw_return_water_temp = boiler['dhw_return_water_temp']
         self.flame_status = boiler['flame_status']
         self.fault_code = boiler['fault_code']
+        self.dhw_preheat_mode = boiler['dhw_preheat_mode']
 
 
 class XiaowoExtBoiler(XiaowoDevice):
