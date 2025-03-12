@@ -1,5 +1,5 @@
 {
-  "name": "Ciaowarm",
+  "name": "ciaowarm",
   "render_readme": true,
   "domains": ["sensor", "number", "select"],
   "category": "integration"
