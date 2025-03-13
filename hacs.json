@@ -1,6 +1,5 @@
 {
   "name": "ciaowarm",
-  "render_readme": true,
-  "domains": ["sensor", "number", "select"],
-  "category": "integration"
+  "homeassistant": "2024.4.4",
+  "hacs": "1.34.0"
 }
