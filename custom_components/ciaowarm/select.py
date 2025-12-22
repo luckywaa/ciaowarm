@@ -14,16 +14,16 @@ from .const import (
 )
 
 OPTIONS = {
-    "work_mode": ["Thermostat_work_mode", "模式", "mdi:alpha-m-box-outline", ' ', ['离家模式', '居家模式', '睡眠模式'],
+    "work_mode": ["Thermostat_work_mode", "模式", "mdi:alpha-m-box-outline", None, ['离家模式', '居家模式', '睡眠模式'],
                   17],
-    "switch_ctrl": ["Boiler_switch_ctrl", "开关机", "mdi:toggle-switch-outline", ' ', ['关机', '开机'], 23],
-    "season_ctrl": ["Boiler_season_ctrl", "冬夏模式", "mdi:sun-snowflake", ' ', ['夏季', '冬季'], 22],
-    "auto_ctrl": ["Boiler_auto_ctrl", "自动控制采暖水目标温度", "mdi:thermometer-auto", ' ', ['禁止', '允许'], 27],
-    "dhw_preheat_status": ["Boiler_dhw_preheat_status", "卫浴水短时预热开关", "mdi:heating-coil", ' ', ['关闭', '开启'],
+    "switch_ctrl": ["Boiler_switch_ctrl", "开关机", "mdi:toggle-switch-outline", None, ['关机', '开机'], 23],
+    "season_ctrl": ["Boiler_season_ctrl", "冬夏模式", "mdi:sun-snowflake", None, ['夏季', '冬季'], 22],
+    "auto_ctrl": ["Boiler_auto_ctrl", "自动控制采暖水目标温度", "mdi:thermometer-auto", None, ['禁止', '允许'], 27],
+    "dhw_preheat_status": ["Boiler_dhw_preheat_status", "卫浴水短时预热开关", "mdi:heating-coil", None, ['关闭', '开启'],
                            10],
-    "ext_auto_ctrl": ["Ext_boiler_auto_ctrl", "自动控制", "mdi:thermostat-auto", ' ', ['禁止', '允许'], 157],
-    "ch_enable": ["Ext_boiler_ch_enable", "采暖允许", "mdi:heat-wave", ' ', ['禁止', '允许'], 160],
-    "dhw_enable": ["Ext_boiler_dhw_enable", "卫浴允许", "mdi:shower", ' ', ['禁止', '允许'], 161],
+    "ext_auto_ctrl": ["Ext_boiler_auto_ctrl", "自动控制", "mdi:thermostat-auto", None, ['禁止', '允许'], 157],
+    "ch_enable": ["Ext_boiler_ch_enable", "采暖允许", "mdi:heat-wave", None, ['禁止', '允许'], 160],
+    "dhw_enable": ["Ext_boiler_dhw_enable", "卫浴允许", "mdi:shower", None, ['禁止', '允许'], 161],
 }
 
 
