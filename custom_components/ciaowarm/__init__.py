@@ -28,6 +28,7 @@ GATEWAY_PLATFORMS = [
     Platform.NUMBER,
     Platform.SELECT,
     Platform.CLIMATE,
+    Platform.WATER_HEATER,
 ]
 
 UPDATE_INTERVAL = timedelta(seconds=20)
