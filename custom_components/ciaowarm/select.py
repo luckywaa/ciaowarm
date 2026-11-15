@@ -8,14 +8,10 @@ from homeassistant.config_entries import ConfigEntry
 from .base import XiaowoEntity
 from .const import (
     DOMAIN,
-    XiaowoThermostat, XiaowoBoiler, XiaowoExtBoiler
+    XiaowoBoiler, XiaowoExtBoiler
 )
 
 OPTIONS = {
-    "work_mode": ["Thermostat_work_mode", "模式", "mdi:alpha-m-box-outline", None, ['离家模式', '居家模式', '睡眠模式'],
-                  17],
-    "switch_ctrl": ["Boiler_switch_ctrl", "开关机", "mdi:toggle-switch-outline", None, ['关机', '开机'], 23],
-    "season_ctrl": ["Boiler_season_ctrl", "冬夏模式", "mdi:sun-snowflake", None, ['夏季', '冬季'], 22],
     "auto_ctrl": ["Boiler_auto_ctrl", "自动控制采暖水目标温度", "mdi:thermometer-auto", None, ['禁止', '允许'], 27],
     "dhw_preheat_status": ["Boiler_dhw_preheat_status", "卫浴水短时预热开关", "mdi:heating-coil", None, ['关闭', '开启'],
                            10],
@@ -31,13 +27,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     device_list = data["devices"]
     entities: list[XiaowoSelectSensor] = []
     for device in device_list:
-        if isinstance(device, XiaowoThermostat):
-            device_id = "t" + str(device.thermostat_id)
-            entities.append(XiaowoSelectSensor(hass, coordinator, device, 'work_mode', device_id))
         if isinstance(device, XiaowoBoiler):
             device_id = "b" + str(device.boiler_id)
-            entities.append(XiaowoSelectSensor(hass, coordinator, device, 'switch_ctrl', device_id))
-            entities.append(XiaowoSelectSensor(hass, coordinator, device, 'season_ctrl', device_id))
             entities.append(XiaowoSelectSensor(hass, coordinator, device, 'auto_ctrl', device_id))
             if device.dhw_preheat_enable:
                 entities.append(
@@ -92,10 +83,6 @@ class XiaowoSelectSensor(XiaowoEntity, SelectEntity):
     @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
-        if self._type == 'switch_ctrl':
-            return self._attr_options[1] if self._device.switch_ctrl else self._attr_options[0]
-        if self._type == 'season_ctrl':
-            return self._attr_options[1] if self._device.season_ctrl else self._attr_options[0]
         if self._type == 'auto_ctrl':
             return self._attr_options[1] if self._device.auto_ctrl else self._attr_options[0]
         if self._type == 'dhw_preheat_status':
@@ -106,19 +93,10 @@ class XiaowoSelectSensor(XiaowoEntity, SelectEntity):
             return self._attr_options[1] if self._device.ch_enable == 1 else self._attr_options[0]
         if self._type == 'dhw_enable':
             return self._attr_options[1] if self._device.dhw_enable == 1 else self._attr_options[0]
-        if self._type == 'work_mode':
-            work_mode = self._device.work_mode
-            if isinstance(work_mode, int) and 0 <= work_mode < len(self._attr_options):
-                return self._attr_options[work_mode]
-            return None
         return None
 
     async def async_select_option(self, option: str) -> None:
-        if self._type == 'switch_ctrl':
-            value = option == '开机'
-        elif self._type == 'season_ctrl':
-            value = option == '冬季'
-        elif self._type == 'auto_ctrl':
+        if self._type == 'auto_ctrl':
             value = option == '允许'
         elif self._type == 'dhw_preheat_status':
             value = option == '开启'
@@ -128,16 +106,10 @@ class XiaowoSelectSensor(XiaowoEntity, SelectEntity):
             value = 1 if option == '允许' else 0
         elif self._type == 'dhw_enable':
             value = 1 if option == '允许' else 0
-        elif self._type == 'work_mode':
-            value = self._attr_options.index(option)
         else:
             return
         await self._send_command(self.option_key, value)
-        if self.option_key == 23:
-            self._device.switch_ctrl = value
-        elif self.option_key == 22:
-            self._device.season_ctrl = value
-        elif self.option_key == 27:
+        if self.option_key == 27:
             self._device.auto_ctrl = value
         elif self.option_key == 10:
             self._device.dhw_preheat_status = value
@@ -147,5 +119,3 @@ class XiaowoSelectSensor(XiaowoEntity, SelectEntity):
             self._device.ch_enable = value
         elif self.option_key == 161:
             self._device.dhw_enable = value
-        elif self.option_key == 17:
-            self._device.work_mode = value

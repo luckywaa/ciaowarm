@@ -9,21 +9,12 @@ from homeassistant.exceptions import HomeAssistantError
 from .base import XiaowoEntity
 from .const import (
     DOMAIN,
-    XiaowoThermostat, XiaowoBoiler, XiaowoExtBoiler
+    XiaowoBoiler, XiaowoExtBoiler
 )
 
 OPTIONS = {
-    "trg_temp_leave": ["Thermostat_trg_temp_leave", "离家模式目标温度", "mdi:temperature-celsius", '°C', 5, 35,
-                       14],
-    "trg_temp_home": ["Thermostat_trg_temp_home", "居家模式目标温度", "mdi:temperature-celsius", '°C', 5, 35,
-                      15],
-    "trg_temp_sleep": ["Thermostat_trg_temp_sleep", "睡眠模式目标温度", "mdi:temperature-celsius", '°C', 5, 35,
-                       16],
-
     "heating_trg_temp": ["Boiler_heating_trg_temp", "采暖水目标温度", "mdi:sun-thermometer-outline", '°C', 30,
                          80, 33],
-    "dhw_trg_temp": ["Boiler_dhw_trg_temp", "卫浴水目标温度", "mdi:water-thermometer-outline", '°C', 30, 60, 7],
-
     "ch_setpoint": ["Ext_boiler_ch_setpoint", "采暖水目标温度", "mdi:sun-thermometer-outline", '°C', 30, 80,
                     162],
     "dhw_setpoint": ["Ext_boiler_dhw_setpoint", "卫浴水目标温度", "mdi:water-thermometer-outline", '°C', 30, 60,
@@ -37,15 +28,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     device_list = data["devices"]
     entities: list[XiaowoNumber] = []
     for device in device_list:
-        if isinstance(device, XiaowoThermostat):
-            device_id = "t" + str(device.thermostat_id)
-            entities.append(XiaowoNumber(hass, coordinator, device, 'trg_temp_leave', device_id))
-            entities.append(XiaowoNumber(hass, coordinator, device, 'trg_temp_home', device_id))
-            entities.append(XiaowoNumber(hass, coordinator, device, 'trg_temp_sleep', device_id))
         if isinstance(device, XiaowoBoiler):
             device_id = "b" + str(device.boiler_id)
             entities.append(XiaowoNumber(hass, coordinator, device, 'heating_trg_temp', device_id))
-            entities.append(XiaowoNumber(hass, coordinator, device, 'dhw_trg_temp', device_id))
         if isinstance(device, XiaowoExtBoiler):
             device_id = "e" + str(device.gateway_id)
             entities.append(XiaowoNumber(hass, coordinator, device, 'ch_setpoint', device_id))
@@ -92,16 +77,8 @@ class XiaowoNumber(XiaowoEntity, NumberEntity):
     @property
     def native_value(self) -> float | None:
         """Return the value reported by the number."""
-        if self._type == 'trg_temp_leave':
-            return self._device.trg_temp_leave
-        if self._type == 'trg_temp_home':
-            return self._device.trg_temp_home
-        if self._type == 'trg_temp_sleep':
-            return self._device.trg_temp_sleep
         if self._type == "heating_trg_temp":
             return self._device.heating_trg_temp
-        if self._type == "dhw_trg_temp":
-            return self._device.dhw_trg_temp
         if self._type == "ch_setpoint":
             return self._device.ch_setpoint
         if self._type == "dhw_setpoint":
@@ -117,16 +94,8 @@ class XiaowoNumber(XiaowoEntity, NumberEntity):
             if self._device.ext_auto_ctrl:
                 raise HomeAssistantError("自动控制为允许状态，无法设置采暖水目标温度！")
         await self._send_command(self.option_key, int(value))
-        if self.option_key == 14:
-            self._device.trg_temp_leave = value
-        elif self.option_key == 15:
-            self._device.trg_temp_home = value
-        elif self.option_key == 16:
-            self._device.trg_temp_sleep = value
-        elif self.option_key == 33:
+        if self.option_key == 33:
             self._device.heating_trg_temp = value
-        elif self.option_key == 7:
-            self._device.dhw_trg_temp = value
         elif self.option_key == 162:
             self._device.ch_setpoint = value
         elif self.option_key == 163:

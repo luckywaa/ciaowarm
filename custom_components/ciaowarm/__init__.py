@@ -7,6 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
@@ -34,6 +35,18 @@ GATEWAY_PLATFORMS = [
 UPDATE_INTERVAL = timedelta(seconds=20)
 
 REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=10)
+
+# 已被 climate / water_heater 实体接管、不再由本集成提供的旧控件，
+# 升级后需从实体注册表移除，避免残留不可用的孤儿实体
+STALE_ENTITY_SUFFIXES = (
+    "Thermostat_work_mode",
+    "Thermostat_trg_temp_leave",
+    "Thermostat_trg_temp_home",
+    "Thermostat_trg_temp_sleep",
+    "Boiler_switch_ctrl",
+    "Boiler_season_ctrl",
+    "Boiler_dhw_trg_temp",
+)
 
 
 async def async_fetch_device_info(hass: HomeAssistant, phone: str, token: str) -> list:
@@ -113,10 +126,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "devices": device_list,
     }
 
+    _async_remove_stale_entities(hass, entry)
+
     await hass.config_entries.async_forward_entry_setups(entry, GATEWAY_PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
     return True
+
+
+def _async_remove_stale_entities(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """移除已被 climate / water_heater 接管、不再提供的旧实体。"""
+    entity_registry = er.async_get(hass)
+    for registry_entry in list(entity_registry.entities.values()):
+        if registry_entry.platform != DOMAIN:
+            continue
+        if registry_entry.config_entry_id != entry.entry_id:
+            continue
+        if registry_entry.unique_id.endswith(STALE_ENTITY_SUFFIXES):
+            entity_registry.async_remove(registry_entry.entity_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
