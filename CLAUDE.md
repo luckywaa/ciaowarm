@@ -60,6 +60,6 @@ Touches several files in lockstep — keep them in sync:
 
 - User-facing strings (entity names, option labels like `开机`/`离家模式`) and log messages are in Chinese; keep new ones consistent with the existing style.
 - Commit messages are written in Chinese.
-- `manifest.json` `version` is bumped per release (currently `v0.1.8`); `hacs.json` pins the minimum HA version (`2025.12` — required for climate/water_heater `native_*` temperature properties and enum sensors).
+- `manifest.json` `version` is bumped per release (currently `v0.2.0`); `hacs.json` pins the minimum HA version (`2025.12` — required for climate/water_heater `native_*` temperature properties and enum sensors). Releases are documented in `CHANGELOG.md`.
 - The boiler `flame_status` cloud field is **inverted**: truthy = 无火 (no flame), while ext-boiler `flame` uses 1 = 有火. The mapping in `sensor.py` is correct as-is — don't "fix" it.
 - Some API values are integers scaled by 10 (only `room_temp`, `room_temp_correct`, `water_pressure_value` are divided by 10 for display; boiler/ext water temps are not); ext-boiler flags come as `1`/`0` while boiler flags are booleans. Match the existing conversion per device type.
