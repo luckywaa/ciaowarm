@@ -27,7 +27,7 @@ from .const import (
 GATEWAY_PLATFORMS = [
     Platform.SENSOR,
     Platform.NUMBER,
-    Platform.SELECT,
+    Platform.SWITCH,
     Platform.CLIMATE,
     Platform.WATER_HEATER,
 ]
@@ -37,6 +37,7 @@ UPDATE_INTERVAL = timedelta(seconds=20)
 REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=10)
 
 # 已被 climate / water_heater 实体接管、不再由本集成提供的旧控件，
+# 以及已由 switch 实体取代的旧 select 控件，
 # 升级后需从实体注册表移除，避免残留不可用的孤儿实体
 STALE_ENTITY_SUFFIXES = (
     "Thermostat_work_mode",
@@ -46,6 +47,11 @@ STALE_ENTITY_SUFFIXES = (
     "Boiler_switch_ctrl",
     "Boiler_season_ctrl",
     "Boiler_dhw_trg_temp",
+    "Boiler_auto_ctrl",
+    "Boiler_dhw_preheat_status",
+    "Ext_boiler_auto_ctrl",
+    "Ext_boiler_ch_enable",
+    "Ext_boiler_dhw_enable",
 )
 
 
