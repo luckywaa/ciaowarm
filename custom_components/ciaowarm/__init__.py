@@ -27,6 +27,7 @@ GATEWAY_PLATFORMS = [
     Platform.SENSOR,
     Platform.NUMBER,
     Platform.SELECT,
+    Platform.CLIMATE,
 ]
 
 UPDATE_INTERVAL = timedelta(seconds=20)
