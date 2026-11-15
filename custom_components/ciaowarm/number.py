@@ -47,7 +47,7 @@ class XiaowoNumber(XiaowoEntity, NumberEntity):
         self._object_id = OPTIONS[option][0]
         self._name = OPTIONS[option][1]
         self._icon = OPTIONS[option][2]
-        self._unit_of_measurement = OPTIONS[option][3]
+        self._attr_native_unit_of_measurement = OPTIONS[option][3]
         self._attr_native_min_value = OPTIONS[option][4]
         self._attr_native_max_value = OPTIONS[option][5]
         self._type = option
@@ -68,11 +68,6 @@ class XiaowoNumber(XiaowoEntity, NumberEntity):
     def icon(self):
         """返回icon属性."""
         return self._icon
-
-    @property
-    def unit_of_measurement(self):
-        """返回unit_of_measuremeng属性."""
-        return self._unit_of_measurement
 
     @property
     def native_value(self) -> float | None:

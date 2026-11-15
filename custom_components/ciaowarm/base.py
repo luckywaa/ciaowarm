@@ -23,7 +23,8 @@ class XiaowoEntity(CoordinatorEntity):
 
     def __init__(self, hass, coordinator, device, device_id) -> None:
         """初始化."""
-        super().__init__(hass, coordinator)
+        # CoordinatorEntity 首个参数即 coordinator，无 hass 参数
+        super().__init__(coordinator)
         self._hass = hass
         self._device = device
         self._device_id = device_id

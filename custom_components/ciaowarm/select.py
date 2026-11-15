@@ -50,7 +50,6 @@ class XiaowoSelectSensor(XiaowoEntity, SelectEntity):
         self._object_id = OPTIONS[option][0]
         self._name = OPTIONS[option][1]
         self._icon = OPTIONS[option][2]
-        self._unit_of_measurement = OPTIONS[option][3]
         self._type = option
         self._attr_unique_id = f"{super().unique_id}{OPTIONS[option][0]}"
         self._attr_options: list[str] = OPTIONS[option][4]
@@ -70,11 +69,6 @@ class XiaowoSelectSensor(XiaowoEntity, SelectEntity):
     def icon(self):
         """返回icon属性."""
         return self._icon
-
-    @property
-    def unit_of_measurement(self):
-        """返回unit_of_measuremeng属性."""
-        return self._unit_of_measurement
 
     @property
     def options(self) -> list[str]:
