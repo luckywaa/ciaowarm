@@ -15,7 +15,8 @@
 
     - 通过应用市场下载并安装小沃云家App（Android和iOS都可以），通过手机号完成登录与绑定设备操作。
     - 点击此链接 ([获取授权码](https://cloud.iwarm.com/halogin.html))，通过手机号（注：输入的手机号需与步骤1的登录手机号一致）获取授权码，保存获取到的授权码。
-    - 将ciaowarm文件夹复制到Home Assistant的custom_components文件夹下，并重启Home Assistant（需 Home Assistant 2025.12 及以上版本）。
+    - 在 HACS 中添加本仓库：打开 HACS → 右上角菜单「⋮」→「自定义仓库」，输入仓库地址 `https://github.com/luckywaa/ciaowarm`，类别选择「集成」，点击「添加」。
+    - 在 HACS 的「集成」列表中找到 Ciaowarm，点击「安装」（需 Home Assistant 2025.12 及以上版本），安装完成后重启 Home Assistant。
     - 点击Home Assistant左侧导航栏“配置”，点击"设备与服务"，点击右下角的“添加集成”，选择“Ciaowarm”品牌，在上面的输入框内输入步骤1和2所用的手机号，在下面的输入框内输入步骤2获取到的授权码，点击“提交”，即可完成接入。
 
 
@@ -89,7 +90,8 @@
 
    - Download and install the Ciaowarm App from the App store (available for both Android and iOS). Log in and bind devices using your phone number.
    - Click on this link ([Get Authorization Code](https://cloud.iwarm.com/halogin.html) and obtain the authorization code by entering your phone number (Note: The phone number entered must match the one used for login in step 1). Save the obtained authorization code.
-   - Copy the "ciaowarm" folder to the "custom_components" folder in Home Assistant, and restart Home Assistant (requires Home Assistant 2025.12 or later).
+   - Add this repository to HACS: open HACS → the "⋮" menu in the top right corner → "Custom repositories", enter the repository URL `https://github.com/luckywaa/ciaowarm`, choose "Integration" as the category, and click "ADD".
+   - Find Ciaowarm in the HACS "Integrations" list and click "Download" (requires Home Assistant 2025.12 or later), then restart Home Assistant.
    - Click on the "Configuration" tab on the left sidebar of Home Assistant, then click on "Devices & Services", and finally click on "Add Integration" in the bottom right corner. Select the "Ciaowarm" brand, enter the phone number used in steps 1 and 2 in the input box above, enter the authorization code obtained in step 2 in the input box below, click "Submit", and you will have completed the integration.
 
 3. Supported Parameters:
