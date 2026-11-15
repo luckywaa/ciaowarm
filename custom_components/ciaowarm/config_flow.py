@@ -4,6 +4,7 @@ import asyncio
 import aiohttp
 
 from homeassistant import config_entries
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import voluptuous as vol
 
 from .const import (
@@ -13,6 +14,8 @@ from .const import (
     CONF_PHONE,
     CONF_KEY
 )
+
+REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=10)
 
 
 class XiaowoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -27,8 +30,8 @@ class XiaowoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _device_info_url = REQUEST_URL_PREFIX + "/ciaowarm/hass/v1/account/check?phone=" + user_input[CONF_PHONE]
             try:
                 headers = {'token': user_input[CONF_KEY]}
-                async with aiohttp.ClientSession(headers=headers) as session:
-                    async with session.get(_device_info_url) as response:
+                session = async_get_clientsession(self.hass)
+                async with session.get(_device_info_url, headers=headers, timeout=REQUEST_TIMEOUT) as response:
                         json_data = await response.json()
                         if json_data is not None:
                             message_code = json_data["message_code"]
