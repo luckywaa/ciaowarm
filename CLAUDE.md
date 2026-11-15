@@ -12,10 +12,16 @@ The whole integration lives in `custom_components/ciaowarm/`. There is no build 
 
 ### Data flow
 
-1. `__init__.py:async_setup_entry` — authenticates with phone + authorization code (stored as config entry data; token sent in the `token` HTTP header), fetches the device list once, creates device-registry entries, and wraps everything in `HomeAssistantXiaowoData`, stored at `hass.data[DOMAIN][entry.entry_id]`.
-2. `HomeAssistantXiaowoData.async_update` polls the same device-info endpoint every 20 s (`async_track_time_interval`) and calls `device.update(payload)` on the plain data-model objects in `device_list`.
-3. Entities in `sensor.py` / `number.py` / `select.py` hold references to those shared data-model objects; their `async_update()` just reads fields off the object (no HTTP).
-4. Writes go through `base.py:XiaowoEntity._send_command`, a PUT of `{phone, gateway_id, thermostat_id, boiler_id, option_key, option_value}`. On success the entity also writes the value back onto the shared device object so the next poll round-trips it.
+1. `__init__.py:async_setup_entry` — authenticates with phone + authorization code (stored as config entry data; token sent in the `token` HTTP header), fetches the device list once, creates device-registry entries, then builds a `XiaowoCoordinator` (`DataUpdateCoordinator`, 20 s interval) stored as `hass.data[DOMAIN][entry.entry_id] = {"coordinator": ..., "devices": device_list}`. It also removes stale registry entities listed in `STALE_ENTITY_SUFFIXES` (controls superseded by climate/water_heater).
+2. `XiaowoCoordinator._async_update_data` polls the same device-info endpoint and calls `device.update(payload)` on the plain data-model objects; failures raise `UpdateFailed`, which flips every entity to unavailable until the next successful poll.
+3. All entities (in `sensor.py` / `number.py` / `select.py` / `climate.py` / `water_heater.py`) extend `base.py:XiaowoEntity(CoordinatorEntity)` and read fields live off the shared data-model object via properties — no per-entity `async_update`. `available` = coordinator success AND the device's `online` property.
+4. Writes go through `base.py:XiaowoEntity._send_command`, a PUT (form-encoded `data=`) of `{phone, gateway_id, thermostat_id, boiler_id, option_key, option_value}` using the shared `async_get_clientsession` session with a 10 s timeout. Failure raises `HomeAssistantError` (shown in the UI). On success the entity also writes the value back onto the shared device object so the UI updates immediately.
+
+### Control entities
+
+- `climate.py` — one per thermostat (`xiaowo.t{id}Thermostat_climate`). Presets AWAY/HOME/SLEEP map to `work_mode` 0/1/2; setting the target temperature writes the setpoint of the *current* mode.
+- `water_heater.py` — one per Ciaowarm boiler (`xiaowo.b{id}Boiler_water_heater`). Operations 关机/夏季/冬季 combine `switch_ctrl` + `season_ctrl`; target temperature is `dhw_trg_temp`. Power on/off controls the whole boiler, heating included.
+- Third-party (ext) boilers have no climate/water_heater entity — keep them on number/select.
 
 ### Data model (`const.py`)
 
@@ -27,25 +33,25 @@ Device IDs and unique IDs:
 
 ### Cloud `option_key` codes
 
-Writable parameters are identified by numeric API codes. They live as magic numbers in the platform files — the last element of each `OPTIONS` entry, then again in the `option_key == N` branches of the set/select handlers:
+Writable parameters are identified by numeric API codes. They live as magic numbers in the platform files — the last element of each `OPTIONS` entry, then again in the `option_key == N` branches of the set/select handlers. Keys 14/15/16/17 (thermostat) are written by `climate.py`, 7/22/23 (boiler dhw/mode/power) by `water_heater.py`; the rest by `number.py`/`select.py`:
 
 | key | parameter | key | parameter |
 |-----|-----------|-----|-----------|
-| 7 | boiler dhw_trg_temp | 23 | boiler switch_ctrl |
+| 7 | boiler dhw_trg_temp (water_heater) | 23 | boiler switch_ctrl (water_heater) |
 | 10 | boiler dhw_preheat_status | 27 | boiler auto_ctrl |
-| 14/15/16 | thermostat trg_temp_leave/home/sleep | 33 | boiler heating_trg_temp |
-| 17 | thermostat work_mode | 157 | ext auto_ctrl |
-| 22 | boiler season_ctrl | 160/161 | ext ch_enable / dhw_enable |
+| 14/15/16 | thermostat trg_temp_leave/home/sleep (climate) | 33 | boiler heating_trg_temp |
+| 17 | thermostat work_mode (climate) | 157 | ext auto_ctrl |
+| 22 | boiler season_ctrl (water_heater) | 160/161 | ext ch_enable / dhw_enable |
 | 163 | ext dhw_setpoint | 162 | ext ch_setpoint |
 
-Interlock rule enforced client-side: heating-water target temp (`option_key` 33 and 162) is rejected while the corresponding auto-control flag (`auto_ctrl` / `ext_auto_ctrl`) is enabled.
+Interlock rule enforced client-side: heating-water target temp (`option_key` 33 and 162) raises `HomeAssistantError` while the corresponding auto-control flag (`auto_ctrl` / `ext_auto_ctrl`) is enabled.
 
 ### Adding or changing a supported parameter
 
 Touches several files in lockstep — keep them in sync:
-1. `const.py` — add the field to the data-model class's `__init__` **and** `update()`.
+1. `const.py` — add the field to the data-model class's `__init__` **and** `update()` (use `.get()` so missing keys become `None`).
 2. The platform file's `OPTIONS` dict (name/label/icon/unit, plus min/max/option_key for `number`, option list/option_key for `select`).
-3. That platform's `async_setup_entry` (instantiate the entity) and `async_update` (read the field).
+3. That platform's `async_setup_entry` (instantiate the entity) and the property that reads the field (entities have no `async_update`).
 4. If writable: the set/select handler, including the `option_key == N` branch that updates the local device object after a successful command.
 5. `README.md` — it documents every supported parameter in bilingual tables (Chinese first, then English); update both halves.
 
@@ -53,5 +59,6 @@ Touches several files in lockstep — keep them in sync:
 
 - User-facing strings (entity names, option labels like `开机`/`离家模式`) and log messages are in Chinese; keep new ones consistent with the existing style.
 - Commit messages are written in Chinese.
-- `manifest.json` `version` is bumped per release (currently `v0.1.4`); `hacs.json` pins the minimum HA version (`2023.12.3`).
-- Some API values are integers scaled by 10 (e.g. `room_temp`, `water_pressure_value` — divided by 10 for display); ext-boiler flags come as `1`/`0` while boiler flags are booleans. Match the existing conversion per device type.
+- `manifest.json` `version` is bumped per release (currently `v0.1.6`); `hacs.json` pins the minimum HA version (`2025.12` — required for climate/water_heater `native_*` temperature properties and enum sensors).
+- The boiler `flame_status` cloud field is **inverted**: truthy = 无火 (no flame), while ext-boiler `flame` uses 1 = 有火. The mapping in `sensor.py` is correct as-is — don't "fix" it.
+- Some API values are integers scaled by 10 (only `room_temp`, `room_temp_correct`, `water_pressure_value` are divided by 10 for display; boiler/ext water temps are not); ext-boiler flags come as `1`/`0` while boiler flags are booleans. Match the existing conversion per device type.
