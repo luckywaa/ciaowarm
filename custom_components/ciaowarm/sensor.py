@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 from homeassistant.components.sensor import (
+    SensorDeviceClass,
     SensorEntity,
+    SensorStateClass,
 )
+from homeassistant.const import UnitOfPressure, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 
@@ -140,9 +143,19 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
         self._object_id = OPTIONS[option][0]
         self._name = OPTIONS[option][1]
         self._icon = OPTIONS[option][2]
-        self._unit_of_measurement = OPTIONS[option][3]
         self._type = option
         self._attr_unique_id = f"{super().unique_id}{OPTIONS[option][0]}"
+        unit = OPTIONS[option][3]
+        if unit == UnitOfTemperature.CELSIUS:
+            self._attr_device_class = SensorDeviceClass.TEMPERATURE
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+            self._attr_native_unit_of_measurement = unit
+            self._attr_suggested_display_precision = 1
+        elif unit == UnitOfPressure.BAR:
+            self._attr_device_class = SensorDeviceClass.PRESSURE
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+            self._attr_native_unit_of_measurement = unit
+            self._attr_suggested_display_precision = 1
         if self._type in ("thermostat_online", "boiler_online", "ext_boiler_online"):
             self._attr_device_class = "enum"
             self._attr_options: list[str] = ['在线', '离线']
@@ -152,6 +165,9 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
         elif self._type == "ext_flame":
             self._attr_device_class = "enum"
             self._attr_options: list[str] = ['有火', '无火']
+        elif self._type == "dhw_preheat_mode":
+            self._attr_device_class = "enum"
+            self._attr_options: list[str] = ['未启用', '短时预热', '定时预热', '水控单次预热']
 
     @property
     def name(self):
@@ -167,11 +183,6 @@ class XiaowoSensor(XiaowoEntity, SensorEntity):
     def icon(self):
         """返回icon属性."""
         return self._icon
-
-    @property
-    def unit_of_measurement(self):
-        """返回unit_of_measuremeng属性."""
-        return self._unit_of_measurement
 
     @property
     def extra_state_attributes(self):
