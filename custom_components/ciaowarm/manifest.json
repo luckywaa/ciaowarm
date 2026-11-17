@@ -4,5 +4,5 @@
   "documentation": "https://gitee.com/iwarmtech_company/ha.git",
   "config_flow": true,
   "iot_class": "cloud_polling",
-  "version": "v0.2.1"
+  "version": "v0.2.1-beta.1"
 }

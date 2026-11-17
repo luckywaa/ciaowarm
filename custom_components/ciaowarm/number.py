@@ -89,10 +89,3 @@ class XiaowoNumber(XiaowoEntity, NumberEntity):
             if self._device.ext_auto_ctrl:
                 raise HomeAssistantError("自动控制为允许状态，无法设置采暖水目标温度！")
         await self._send_command(self.option_key, int(value))
-        if self.option_key == 33:
-            self._device.heating_trg_temp = value
-        elif self.option_key == 162:
-            self._device.ch_setpoint = value
-        elif self.option_key == 163:
-            self._device.dhw_setpoint = value
-        self.async_write_ha_state()

@@ -92,11 +92,9 @@ class XiaowoSwitch(XiaowoEntity, SwitchEntity):
         await self._async_set_value(False)
 
     async def _async_set_value(self, value: bool):
-        """下发指令并回写共享数据模型，失败抛 HomeAssistantError."""
+        """下发指令，失败抛 HomeAssistantError；状态以轮询结果为准."""
         if self._type in INT_FIELDS:
             payload = 1 if value else 0
         else:
             payload = value
         await self._send_command(self.option_key, payload)
-        setattr(self._device, self._type, payload)
-        self.async_write_ha_state()

@@ -2,11 +2,6 @@
 from __future__ import annotations
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature, HVACMode
-from homeassistant.components.climate.const import (
-    PRESET_AWAY,
-    PRESET_HOME,
-    PRESET_SLEEP,
-)
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -14,17 +9,14 @@ from homeassistant.config_entries import ConfigEntry
 from .base import XiaowoEntity
 from .const import (
     DOMAIN,
+    WORK_MODE_LABELS,
     XiaowoThermostat,
 )
 
-# work_mode 与预设的对应关系
-PRESET_TO_WORK_MODE = {
-    PRESET_AWAY: 0,
-    PRESET_HOME: 1,
-    PRESET_SLEEP: 2,
-}
-WORK_MODE_TO_PRESET = {value: key for key, value in PRESET_TO_WORK_MODE.items()}
-PRESET_ORDER = [PRESET_AWAY, PRESET_HOME, PRESET_SLEEP]
+# 预设模式名称与官方 App 保持一致（离家/居家/睡眠）
+PRESET_TO_WORK_MODE = {label: mode for mode, label in WORK_MODE_LABELS.items()}
+WORK_MODE_TO_PRESET = dict(WORK_MODE_LABELS)
+PRESET_ORDER = [WORK_MODE_LABELS[mode] for mode in sorted(WORK_MODE_LABELS)]
 
 # 各 work_mode 的目标温度字段与对应 option_key
 WORK_MODE_FIELDS = {
@@ -117,8 +109,6 @@ class XiaowoClimate(XiaowoEntity, ClimateEntity):
             return
         field, option_key = field_and_key
         await self._send_command(option_key, int(temperature))
-        setattr(self._device, field, int(temperature))
-        self.async_write_ha_state()
 
     async def async_set_preset_mode(self, preset_mode: str):
         """切换离家/居家/睡眠模式."""
@@ -126,8 +116,6 @@ class XiaowoClimate(XiaowoEntity, ClimateEntity):
         if work_mode is None:
             return
         await self._send_command(17, work_mode)
-        self._device.work_mode = work_mode
-        self.async_write_ha_state()
 
     async def async_set_hvac_mode(self, hvac_mode):
         """温控器无独立电源控制，无需处理."""

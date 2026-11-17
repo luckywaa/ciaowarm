@@ -20,6 +20,7 @@ from .const import (
     REQUEST_URL_PREFIX,
     CONF_PHONE,
     CONF_KEY,
+    WORK_MODE_LABELS,
     XiaowoApiError,
     XiaowoDevice, XiaowoThermostat, XiaowoBoiler, XiaowoExtBoiler
 )
@@ -53,6 +54,18 @@ STALE_ENTITY_SUFFIXES = (
     "Ext_boiler_ch_enable",
     "Ext_boiler_dhw_enable",
 )
+
+# climate 预设/目标温度与热水器卫浴水目标温度属于实体属性变化，
+# 原生 Logbook 只按状态值渲染、不会显示；开关/数值实体的状态变化原生已有记录。
+# 轮询确认这些属性变化后补写中文 Logbook 条目，App 端等外部操作同样生效。
+THERMOSTAT_LOG_FIELDS = {
+    "trg_temp_leave": "离家模式目标温度",
+    "trg_temp_home": "居家模式目标温度",
+    "trg_temp_sleep": "睡眠模式目标温度",
+}
+BOILER_LOG_FIELDS = {
+    "dhw_trg_temp": "卫浴水目标温度",
+}
 
 
 async def async_fetch_device_info(hass: HomeAssistant, phone: str, token: str) -> list:
@@ -197,12 +210,14 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
                         for device in self.device_list:
                             if isinstance(device, XiaowoThermostat):
                                 if device.thermostat_id == thermostat.get('thermostat_id'):
+                                    self._log_thermostat_changes(device, thermostat)
                                     device.update(thermostat)
                 if gateway_item == "boilers":
                     for boiler in item[gateway_item]:
                         for device in self.device_list:
                             if isinstance(device, XiaowoBoiler):
                                 if device.boiler_id == boiler.get('boiler_id'):
+                                    self._log_boiler_changes(device, boiler)
                                     device.update(boiler)
                 if gateway_item == "extBoiler":
                     ext_boiler = item[gateway_item]
@@ -211,3 +226,44 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
                             if device.gateway_id == gateway_id:
                                 device.update(ext_boiler)
         return self.device_list
+
+    def _logbook_entry(self, name: str, message: str, platform: Platform, unique_id: str) -> None:
+        """写入一条 Logbook 条目并归属到对应实体；logbook 未加载时跳过。"""
+        if "logbook" not in self.hass.config.components:
+            return
+        entity_id = er.async_get(self.hass).async_get_entity_id(platform, DOMAIN, unique_id)
+        self.hass.components.logbook.async_log_entry(name, message, DOMAIN, entity_id)
+
+    def _log_thermostat_changes(self, device: XiaowoThermostat, thermostat: dict) -> None:
+        """轮询确认温控器模式与各模式目标温度变化后补写 Logbook（原生不显示属性变化）。"""
+        unique_id = f"xiaowo.t{device.thermostat_id}Thermostat_climate"
+        name = device.thermostat_name or "小沃温控器"
+        old_mode = device.work_mode
+        new_mode = thermostat.get("work_mode")
+        if old_mode is not None and new_mode is not None and old_mode != new_mode:
+            self._logbook_entry(
+                name,
+                f"模式由「{WORK_MODE_LABELS.get(old_mode, old_mode)}」"
+                f"切换为「{WORK_MODE_LABELS.get(new_mode, new_mode)}」",
+                Platform.CLIMATE,
+                unique_id,
+            )
+        for field, label in THERMOSTAT_LOG_FIELDS.items():
+            old_value = getattr(device, field, None)
+            new_value = thermostat.get(field)
+            if old_value is None or new_value is None or old_value == new_value:
+                continue
+            self._logbook_entry(
+                name, f"{label}由 {old_value}℃ 调整为 {new_value}℃", Platform.CLIMATE, unique_id)
+
+    def _log_boiler_changes(self, device: XiaowoBoiler, boiler: dict) -> None:
+        """轮询确认壁挂炉属性变化后补写 Logbook（原生不显示属性变化）。"""
+        unique_id = f"xiaowo.b{device.boiler_id}Boiler_water_heater"
+        for field, label in BOILER_LOG_FIELDS.items():
+            old_value = getattr(device, field, None)
+            new_value = boiler.get(field)
+            if old_value is None or new_value is None or old_value == new_value:
+                continue
+            self._logbook_entry(
+                "小沃壁挂炉", f"{label}由 {old_value}℃ 调整为 {new_value}℃",
+                Platform.WATER_HEATER, unique_id)

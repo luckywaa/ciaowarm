@@ -6,6 +6,13 @@ REQUEST_URL_PREFIX = "https://api.iwarm.com"
 CONF_PHONE = "phone"
 CONF_KEY = "key"
 
+# work_mode 与预设模式名称的对应关系（与官方 App 保持一致）
+WORK_MODE_LABELS = {
+    0: "离家",
+    1: "居家",
+    2: "睡眠",
+}
+
 
 class XiaowoApiError(Exception):
     """小沃云端接口返回错误。"""
