@@ -95,3 +95,4 @@ class XiaowoNumber(XiaowoEntity, NumberEntity):
             self._device.ch_setpoint = value
         elif self.option_key == 163:
             self._device.dhw_setpoint = value
+        self.async_write_ha_state()

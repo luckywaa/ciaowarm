@@ -118,6 +118,7 @@ class XiaowoClimate(XiaowoEntity, ClimateEntity):
         field, option_key = field_and_key
         await self._send_command(option_key, int(temperature))
         setattr(self._device, field, int(temperature))
+        self.async_write_ha_state()
 
     async def async_set_preset_mode(self, preset_mode: str):
         """切换离家/居家/睡眠模式."""
@@ -126,6 +127,7 @@ class XiaowoClimate(XiaowoEntity, ClimateEntity):
             return
         await self._send_command(17, work_mode)
         self._device.work_mode = work_mode
+        self.async_write_ha_state()
 
     async def async_set_hvac_mode(self, hvac_mode):
         """温控器无独立电源控制，无需处理."""

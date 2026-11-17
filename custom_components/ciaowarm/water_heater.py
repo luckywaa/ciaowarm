@@ -93,6 +93,7 @@ class XiaowoWaterHeater(XiaowoEntity, WaterHeaterEntity):
             return
         await self._send_command(7, int(temperature))
         self._device.dhw_trg_temp = int(temperature)
+        self.async_write_ha_state()
 
     async def async_set_operation_mode(self, operation_mode: str):
         """切换运行模式：关机/夏季/冬季."""
@@ -111,3 +112,4 @@ class XiaowoWaterHeater(XiaowoEntity, WaterHeaterEntity):
         self._device.switch_ctrl = operation_mode != OPERATION_OFF
         if operation_mode != OPERATION_OFF:
             self._device.season_ctrl = operation_mode == OPERATION_WINTER
+        self.async_write_ha_state()

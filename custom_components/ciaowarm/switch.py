@@ -99,3 +99,4 @@ class XiaowoSwitch(XiaowoEntity, SwitchEntity):
             payload = value
         await self._send_command(self.option_key, payload)
         setattr(self._device, self._type, payload)
+        self.async_write_ha_state()
