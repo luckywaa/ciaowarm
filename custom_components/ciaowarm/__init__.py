@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import aiohttp
 
+from homeassistant.components.logbook import async_log_entry
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -228,11 +229,9 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
         return self.device_list
 
     def _logbook_entry(self, name: str, message: str, platform: Platform, unique_id: str) -> None:
-        """写入一条 Logbook 条目并归属到对应实体；logbook 未加载时跳过。"""
-        if "logbook" not in self.hass.config.components:
-            return
+        """写入一条 Logbook 条目并归属到对应实体。"""
         entity_id = er.async_get(self.hass).async_get_entity_id(platform, DOMAIN, unique_id)
-        self.hass.components.logbook.async_log_entry(name, message, DOMAIN, entity_id)
+        async_log_entry(self.hass, name, message, DOMAIN, entity_id)
 
     def _log_thermostat_changes(self, device: XiaowoThermostat, thermostat: dict) -> None:
         """轮询确认温控器模式与各模式目标温度变化后补写 Logbook（原生不显示属性变化）。"""

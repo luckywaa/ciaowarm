@@ -1,5 +1,11 @@
 # 更新日志
 
+## v0.2.1-beta.2（2026-11-17，验证版）
+
+### 修复
+
+- 修复 beta.1 轮询补写日志时因 `hass.components` 旧式访问已被移除导致刷新持续报错的问题，改为直接调用 `logbook.async_log_entry`，并在 manifest 声明对 logbook 的依赖
+
 ## v0.2.1-beta.1（2026-11-17，验证版）
 
 ### 修复
