@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import timedelta
 
 import aiohttp
@@ -67,6 +68,15 @@ THERMOSTAT_LOG_FIELDS = {
 BOILER_LOG_FIELDS = {
     "dhw_trg_temp": "卫浴水目标温度",
 }
+
+# 云端在设备链路抖动时会短暂把目标温度类设定值清零（温控器 5–35℃、卫浴水 30–60℃，0 非合法设定），
+# 这类 0 值不采用：轮询时沿用上一轮值，避免实体属性闪变与「调整为 0℃」的假日志
+ZERO_GLITCH_FIELDS = (
+    "trg_temp_leave",
+    "trg_temp_home",
+    "trg_temp_sleep",
+    "dhw_trg_temp",
+)
 
 
 async def async_fetch_device_info(hass: HomeAssistant, phone: str, token: str) -> list:
@@ -179,6 +189,27 @@ async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry) -> Non
     await hass.config_entries.async_reload(config_entry.entry_id)
 
 
+# 轮询成功摘要的降级目标级别：低于 debug，默认不输出
+TRACE_LOG_LEVEL = 5
+logging.addLevelName(TRACE_LOG_LEVEL, "TRACE")
+
+
+class _PollSummaryLogger(logging.LoggerAdapter):
+    """DataUpdateCoordinator 每次成功轮询都会以 debug 输出一条成功摘要，
+    20 秒一条刷屏且淹没排障信息；将 success 为 True 的摘要降为 trace，
+    失败原因与异常日志保持原级别。"""
+
+    def log(self, level, msg, *args, **kwargs):
+        if (
+            level == logging.DEBUG
+            and msg.endswith("(success: %s)")
+            and args
+            and args[-1] is True
+        ):
+            level = TRACE_LOG_LEVEL
+        return super().log(level, msg, *args, **kwargs)
+
+
 class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
     """轮询云端设备信息并更新共享数据模型对象。"""
 
@@ -186,7 +217,7 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
         """Initialize coordinator."""
         super().__init__(
             hass,
-            LOGGER,
+            _PollSummaryLogger(LOGGER, {}),
             name=DOMAIN,
             update_interval=UPDATE_INTERVAL,
         )
@@ -211,6 +242,7 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
                         for device in self.device_list:
                             if isinstance(device, XiaowoThermostat):
                                 if device.thermostat_id == thermostat.get('thermostat_id'):
+                                    thermostat = self._drop_zero_glitch(device, thermostat)
                                     self._log_thermostat_changes(device, thermostat)
                                     device.update(thermostat)
                 if gateway_item == "boilers":
@@ -218,6 +250,7 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
                         for device in self.device_list:
                             if isinstance(device, XiaowoBoiler):
                                 if device.boiler_id == boiler.get('boiler_id'):
+                                    boiler = self._drop_zero_glitch(device, boiler)
                                     self._log_boiler_changes(device, boiler)
                                     device.update(boiler)
                 if gateway_item == "extBoiler":
@@ -227,6 +260,15 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
                             if device.gateway_id == gateway_id:
                                 device.update(ext_boiler)
         return self.device_list
+
+    @staticmethod
+    def _drop_zero_glitch(device: XiaowoDevice, payload: dict) -> dict:
+        """云端抖动清零时沿用上一轮值，并以 debug 日志留痕便于定位。"""
+        for field in ZERO_GLITCH_FIELDS:
+            if payload.get(field) == 0:
+                LOGGER.debug("云端将 %s 清零，疑为链路抖动，沿用上一轮值", field)
+                payload[field] = getattr(device, field, None)
+        return payload
 
     def _logbook_entry(self, name: str, message: str, platform: Platform, unique_id: str) -> None:
         """写入一条 Logbook 条目并归属到对应实体。"""
@@ -250,7 +292,8 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
         for field, label in THERMOSTAT_LOG_FIELDS.items():
             old_value = getattr(device, field, None)
             new_value = thermostat.get(field)
-            if old_value is None or new_value is None or old_value == new_value:
+            # 0 值为云端抖动假数据（可能残留于启动初值），双向跳过
+            if not old_value or not new_value or old_value == new_value:
                 continue
             self._logbook_entry(
                 name, f"{label}由 {old_value}℃ 调整为 {new_value}℃", Platform.CLIMATE, unique_id)
@@ -261,7 +304,8 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
         for field, label in BOILER_LOG_FIELDS.items():
             old_value = getattr(device, field, None)
             new_value = boiler.get(field)
-            if old_value is None or new_value is None or old_value == new_value:
+            # 0 值为云端抖动假数据（可能残留于启动初值），双向跳过
+            if not old_value or not new_value or old_value == new_value:
                 continue
             self._logbook_entry(
                 "小沃壁挂炉", f"{label}由 {old_value}℃ 调整为 {new_value}℃",
