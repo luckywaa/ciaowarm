@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from datetime import timedelta
 
 import aiohttp
@@ -189,27 +188,6 @@ async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry) -> Non
     await hass.config_entries.async_reload(config_entry.entry_id)
 
 
-# 轮询成功摘要的降级目标级别：低于 debug，默认不输出
-TRACE_LOG_LEVEL = 5
-logging.addLevelName(TRACE_LOG_LEVEL, "TRACE")
-
-
-class _PollSummaryLogger(logging.LoggerAdapter):
-    """DataUpdateCoordinator 每次成功轮询都会以 debug 输出一条成功摘要，
-    20 秒一条刷屏且淹没排障信息；将 success 为 True 的摘要降为 trace，
-    失败原因与异常日志保持原级别。"""
-
-    def log(self, level, msg, *args, **kwargs):
-        if (
-            level == logging.DEBUG
-            and msg.endswith("(success: %s)")
-            and args
-            and args[-1] is True
-        ):
-            level = TRACE_LOG_LEVEL
-        return super().log(level, msg, *args, **kwargs)
-
-
 class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
     """轮询云端设备信息并更新共享数据模型对象。"""
 
@@ -217,7 +195,7 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
         """Initialize coordinator."""
         super().__init__(
             hass,
-            _PollSummaryLogger(LOGGER, {}),
+            LOGGER,
             name=DOMAIN,
             update_interval=UPDATE_INTERVAL,
         )
