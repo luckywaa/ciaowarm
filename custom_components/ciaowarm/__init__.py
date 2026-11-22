@@ -117,6 +117,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     device_list: list[XiaowoDevice] = []
     for item in message_info:
         gateway_id = item.get('gateway_id')
+        gateway_device_id = "g" + str(gateway_id)
+        # 网关父设备需先于子设备创建，温控器/壁挂炉/第三方壁挂炉经由它建立 via 关联，
+        # 各设备页显示「通过 小沃网关 连接」，网关页列出同网关全部设备
+        # （via_device 标识符形态 HA 2027.8 起移除，届时需迁移到 via_device_id）
+        device_registry.async_get_or_create(
+            config_entry_id=entry.entry_id,
+            identifiers={(DOMAIN, gateway_device_id)},
+            manufacturer="IWARM TECH CO., LTD.",
+            name=f"小沃网关 {gateway_id}",
+            model="gateway",
+        )
         for gateway_item in item:
             if gateway_item == "thermostats":
                 thermostats = item[gateway_item]
@@ -129,6 +140,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                         manufacturer="IWARM TECH CO., LTD.",
                         name=thermostat["thermostat_name"],
                         model=f"thermostat",
+                        via_device=(DOMAIN, gateway_device_id),
                     )
             if gateway_item == "boilers":
                 boilers = item[gateway_item]
@@ -141,6 +153,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                         manufacturer="IWARM TECH CO., LTD.",
                         name="小沃壁挂炉",
                         model=f"boiler",
+                        via_device=(DOMAIN, gateway_device_id),
                     )
             if gateway_item == "extBoiler":
                 ext_boiler = item[gateway_item]
@@ -152,6 +165,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     manufacturer="IWARM TECH CO., LTD.",
                     name="第三方壁挂炉",
                     model=f"extBoiler",
+                    via_device=(DOMAIN, gateway_device_id),
                 )
 
     coordinator = XiaowoCoordinator(hass, phone, access_token, device_list)

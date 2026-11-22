@@ -40,6 +40,8 @@ class XiaowoEntity(CoordinatorEntity):
         """Return a device description for device registry."""
         return DeviceInfo(
             identifiers={(DOMAIN, self._device_id)},
+            # 与 setup 时创建的网关父设备建立 via 关联（父设备先于实体加载存在）
+            via_device=(DOMAIN, "g" + str(self._device.gateway_id)),
         )
 
     async def _send_command(self, option_key, option_value) -> None:
