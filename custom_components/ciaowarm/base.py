@@ -17,7 +17,7 @@ REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=10)
 
 
 class XiaowoEntity(CoordinatorEntity):
-    """小沃实体基类：状态由 coordinator 推送，可用性跟随更新结果与设备在线状态。"""
+    """小沃实体基类：状态由 coordinator 推送，短暂轮询失败保持可用并沿用最后一轮数据。"""
 
     _attr_should_poll = False
 
@@ -32,8 +32,8 @@ class XiaowoEntity(CoordinatorEntity):
 
     @property
     def available(self) -> bool:
-        """coordinator 更新正常且设备在线时可用."""
-        return super().available and self._device.online
+        """连续失败超过宽限阈值（约 5 分钟）或设备离线时不可用."""
+        return (self.coordinator.last_update_success or not self.coordinator.degraded) and self._device.online
 
     @property
     def device_info(self) -> DeviceInfo:

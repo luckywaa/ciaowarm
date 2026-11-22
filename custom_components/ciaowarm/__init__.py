@@ -68,14 +68,21 @@ BOILER_LOG_FIELDS = {
     "dhw_trg_temp": "卫浴水目标温度",
 }
 
-# 云端在设备链路抖动时会短暂把目标温度类设定值清零（温控器 5–35℃、卫浴水 30–60℃，0 非合法设定），
-# 这类 0 值不采用：轮询时沿用上一轮值，避免实体属性闪变与「调整为 0℃」的假日志
+# 云端在设备链路抖动/离线时会短暂把温度类字段清零（目标温度非合法设定：温控器 5–35℃、卫浴水 30–60℃；
+# 室内温度/修正后室内温度为绝对温度，0℃ 非合理读数），这类 0 值不采用：轮询时沿用上一轮值，
+# 避免实体属性闪变与「调整为 0℃」的假日志
 ZERO_GLITCH_FIELDS = (
     "trg_temp_leave",
     "trg_temp_home",
     "trg_temp_sleep",
     "dhw_trg_temp",
+    "room_temp",
+    "room_temp_correct",
 )
+
+# 轮询连续失败达到该次数（20 秒 × 15 ≈ 5 分钟）才将实体置为不可用：
+# 短暂网络/DNS 抖动期间实体保持可用并沿用最后一轮数据（设备离线不受此宽限影响）
+UNAVAILABLE_AFTER_FAILURES = 15
 
 
 async def async_fetch_device_info(hass: HomeAssistant, phone: str, token: str) -> list:
@@ -202,15 +209,24 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
         self._phone = phone
         self._token = token
         self.device_list = device_list
+        self._consecutive_failures = 0
+
+    @property
+    def degraded(self) -> bool:
+        """连续失败是否已超过宽限阈值（约 5 分钟），此时实体才置为不可用。"""
+        return self._consecutive_failures >= UNAVAILABLE_AFTER_FAILURES
 
     async def _async_update_data(self) -> list[XiaowoDevice]:
         """拉取设备信息并更新数据模型，失败抛 UpdateFailed。"""
         try:
             message_info = await async_fetch_device_info(self.hass, self._phone, self._token)
         except XiaowoApiError as err:
+            self._consecutive_failures += 1
             raise UpdateFailed(f"接口返回错误：{err}") from err
         except (asyncio.TimeoutError, aiohttp.ClientError) as err:
+            self._consecutive_failures += 1
             raise UpdateFailed(f"访问云端接口失败：{err}") from err
+        self._consecutive_failures = 0
 
         for item in message_info:
             gateway_id = item.get('gateway_id')
