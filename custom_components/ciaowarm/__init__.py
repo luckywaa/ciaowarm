@@ -40,12 +40,10 @@ REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=10)
 
 # 已被 climate / water_heater 实体接管、不再由本集成提供的旧控件，
 # 以及已由 switch 实体取代的旧 select 控件，
-# 升级后需从实体注册表移除，避免残留不可用的孤儿实体
+# 升级后需从实体注册表移除，避免残留不可用的孤儿实体；
+# 离家/居家/睡眠目标温度已重新由 number 实体提供，不再清理
 STALE_ENTITY_SUFFIXES = (
     "Thermostat_work_mode",
-    "Thermostat_trg_temp_leave",
-    "Thermostat_trg_temp_home",
-    "Thermostat_trg_temp_sleep",
     "Boiler_switch_ctrl",
     "Boiler_season_ctrl",
     "Boiler_dhw_trg_temp",
@@ -56,14 +54,10 @@ STALE_ENTITY_SUFFIXES = (
     "Ext_boiler_dhw_enable",
 )
 
-# climate 预设/目标温度与热水器卫浴水目标温度属于实体属性变化，
-# 原生 Logbook 只按状态值渲染、不会显示；开关/数值实体的状态变化原生已有记录。
+# climate 预设模式与热水器卫浴水目标温度属于实体属性变化，
+# 原生 Logbook 只按状态值渲染、不会显示；开关/数值实体的状态变化原生已有记录，
+# 不要注入（各模式目标温度现为 number 实体，原生记录温度调整）。
 # 轮询确认这些属性变化后补写中文 Logbook 条目，App 端等外部操作同样生效。
-THERMOSTAT_LOG_FIELDS = {
-    "trg_temp_leave": "离家模式目标温度",
-    "trg_temp_home": "居家模式目标温度",
-    "trg_temp_sleep": "睡眠模式目标温度",
-}
 BOILER_LOG_FIELDS = {
     "dhw_trg_temp": "卫浴水目标温度",
 }
@@ -284,7 +278,7 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
         async_log_entry(self.hass, name, message, DOMAIN, entity_id)
 
     def _log_thermostat_changes(self, device: XiaowoThermostat, thermostat: dict) -> None:
-        """轮询确认温控器模式与各模式目标温度变化后补写 Logbook（原生不显示属性变化）。"""
+        """轮询确认温控器模式变化后补写 Logbook（预设属属性变化，原生不显示）。"""
         unique_id = f"xiaowo.t{device.thermostat_id}Thermostat_climate"
         name = device.thermostat_name or "小沃温控器"
         old_mode = device.work_mode
@@ -297,14 +291,6 @@ class XiaowoCoordinator(DataUpdateCoordinator[list[XiaowoDevice]]):
                 Platform.CLIMATE,
                 unique_id,
             )
-        for field, label in THERMOSTAT_LOG_FIELDS.items():
-            old_value = getattr(device, field, None)
-            new_value = thermostat.get(field)
-            # 0 值为云端抖动假数据（可能残留于启动初值），双向跳过
-            if not old_value or not new_value or old_value == new_value:
-                continue
-            self._logbook_entry(
-                name, f"{label}由 {old_value}℃ 调整为 {new_value}℃", Platform.CLIMATE, unique_id)
 
     def _log_boiler_changes(self, device: XiaowoBoiler, boiler: dict) -> None:
         """轮询确认壁挂炉属性变化后补写 Logbook（原生不显示属性变化）。"""

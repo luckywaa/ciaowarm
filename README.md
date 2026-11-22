@@ -33,6 +33,7 @@
    |     室内温度     |   只读   |
    |  修正后室内温度  |   只读   |
    | 温控器控制（Climate 实体） | 可读写（目标温度按当前模式写入 5-35℃；预设模式：离家/居家/睡眠） |
+   | 各模式目标温度（Number 实体 ×3） | 可读写（离家/居家/睡眠各一个，5-35℃，无需切换模式即可调节） |
    
    
    
@@ -107,6 +108,7 @@
    | Indoor Temperature            | Read-only            |
    | Correct Indoor Temperature    | Read-only            |
    | Thermostat Control (Climate entity) | Read-write (target temperature 5-35℃, written per the active preset; presets: Away/Home/Sleep) |
+   | Mode Target Temperatures (3 Number entities) | Read-write (one per Away/Home/Sleep, 5-35℃, adjustable without switching presets) |
    
    Ciaowarm Wall-mounted Boiler:
    

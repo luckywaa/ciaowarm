@@ -9,10 +9,16 @@ from homeassistant.exceptions import HomeAssistantError
 from .base import XiaowoEntity
 from .const import (
     DOMAIN,
-    XiaowoBoiler, XiaowoExtBoiler
+    XiaowoBoiler, XiaowoExtBoiler, XiaowoThermostat
 )
 
 OPTIONS = {
+    "trg_temp_leave": ["Thermostat_trg_temp_leave", "离家模式目标温度", "mdi:thermometer-low", '°C', 5, 35,
+                       14],
+    "trg_temp_home": ["Thermostat_trg_temp_home", "居家模式目标温度", "mdi:home-thermometer-outline", '°C', 5,
+                      35, 15],
+    "trg_temp_sleep": ["Thermostat_trg_temp_sleep", "睡眠模式目标温度", "mdi:weather-night", '°C', 5, 35,
+                       16],
     "heating_trg_temp": ["Boiler_heating_trg_temp", "采暖水目标温度", "mdi:sun-thermometer-outline", '°C', 30,
                          80, 33],
     "ch_setpoint": ["Ext_boiler_ch_setpoint", "采暖水目标温度", "mdi:sun-thermometer-outline", '°C', 30, 80,
@@ -28,6 +34,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     device_list = data["devices"]
     entities: list[XiaowoNumber] = []
     for device in device_list:
+        if isinstance(device, XiaowoThermostat):
+            device_id = "t" + str(device.thermostat_id)
+            entities.append(XiaowoNumber(hass, coordinator, device, 'trg_temp_leave', device_id))
+            entities.append(XiaowoNumber(hass, coordinator, device, 'trg_temp_home', device_id))
+            entities.append(XiaowoNumber(hass, coordinator, device, 'trg_temp_sleep', device_id))
         if isinstance(device, XiaowoBoiler):
             device_id = "b" + str(device.boiler_id)
             entities.append(XiaowoNumber(hass, coordinator, device, 'heating_trg_temp', device_id))
@@ -72,6 +83,12 @@ class XiaowoNumber(XiaowoEntity, NumberEntity):
     @property
     def native_value(self) -> float | None:
         """Return the value reported by the number."""
+        if self._type == "trg_temp_leave":
+            return self._device.trg_temp_leave
+        if self._type == "trg_temp_home":
+            return self._device.trg_temp_home
+        if self._type == "trg_temp_sleep":
+            return self._device.trg_temp_sleep
         if self._type == "heating_trg_temp":
             return self._device.heating_trg_temp
         if self._type == "ch_setpoint":
